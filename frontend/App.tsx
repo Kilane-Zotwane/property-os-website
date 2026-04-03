@@ -240,8 +240,33 @@ const roles = [
   },
 ];
 
+type WaitlistStatus = 'idle' | 'loading' | 'success' | 'error';
+
 const App: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [waitlistStatus, setWaitlistStatus] = useState<WaitlistStatus>('idle');
+
+  const handleWaitlistSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email) return;
+    setWaitlistStatus('loading');
+    try {
+      const body = new URLSearchParams({ 'form-name': 'waitlist', email }).toString();
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+      if (res.ok) {
+        setWaitlistStatus('success');
+        setEmail('');
+      } else {
+        setWaitlistStatus('error');
+      }
+    } catch {
+      setWaitlistStatus('error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 antialiased">
@@ -313,21 +338,44 @@ const App: React.FC = () => {
               Take the grind out of managing rentals—AI and automation handle the heavy lifting, while leases,
               payments, and maintenance stay organised in one place instead of scattered across chats and spreadsheets.
             </p>
-            <div id="early-access" className="mt-10 flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.co.za"
-                className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
-              />
-              <button
-                type="button"
-                className="rounded-xl bg-teal-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-400"
+            {waitlistStatus === 'success' ? (
+              <div id="early-access" className="mt-10 max-w-lg rounded-xl border border-teal-400/30 bg-teal-500/10 px-5 py-4">
+                <p className="text-sm font-semibold text-teal-300">You're on the list 🎉</p>
+                <p className="mt-1 text-xs text-slate-400">We'll be in touch with updates and launch timing.</p>
+              </div>
+            ) : (
+              <form
+                id="early-access"
+                name="waitlist"
+                method="POST"
+                data-netlify="true"
+                data-netlify-honeypot="bot-field"
+                onSubmit={handleWaitlistSubmit}
+                className="mt-10 flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center"
               >
-                Join the waitlist
-              </button>
-            </div>
+                <input type="hidden" name="form-name" value="waitlist" />
+                <input type="hidden" name="bot-field" />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.co.za"
+                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                />
+                <button
+                  type="submit"
+                  disabled={waitlistStatus === 'loading'}
+                  className="rounded-xl bg-teal-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-400 disabled:opacity-60"
+                >
+                  {waitlistStatus === 'loading' ? 'Submitting…' : 'Join the waitlist'}
+                </button>
+              </form>
+            )}
+            {waitlistStatus === 'error' && (
+              <p className="mt-2 text-xs text-red-400">Something went wrong—please try again.</p>
+            )}
             <p className="mt-3 text-xs text-slate-500">
               No spam—just product updates and launch timing for early partners.
             </p>

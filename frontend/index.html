@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Os | AI-Powered Property Management</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T7TZPSF9HB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-T7TZPSF9HB');
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @keyframes bubble-float {
@@ -24,6 +34,12 @@
     </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+
+    <!-- Hidden form so Netlify's deploy bot can detect it (required for React SPAs) -->
+    <form name="waitlist" netlify netlify-honeypot="bot-field" hidden>
+      <input type="email" name="email" />
+    </form>
+
     <script type="module" src="index.tsx"></script>
 </body>
 </html>
